@@ -1,0 +1,73 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 30m
+
+spring:
+  application:
+    name: student-account-portal
+  docker:
+    compose:
+      enabled: false
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/student_account_portal?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
+
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+  messages:
+    basename: messages
+    encoding: UTF-8
+
+app:
+  base-url: http://localhost:8080
+  security:
+    totp:
+      aes-key: 4f7c8b2a1e3d5f90a2b4c6e8f1a3b5c7
+      issuer: "FPT Aptech Portal"
+    password:
+      min-length: 12
+    lock:
+      max-failed-attempts: 5
+      duration-minutes: 15
+
+logging:
+  level:
+    root: INFO
+    com.fptaptech.auth: DEBUG
+    org.springframework.security: INFO

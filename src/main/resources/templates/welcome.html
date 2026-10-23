@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: header('Trang chủ học viên')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div th:replace="~{fragments :: alerts}"></div>
+
+<div class="container py-5">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="portal-card p-4 p-md-5 bg-gradient text-dark">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill mb-2">
+                            <i class="bi bi-patch-check-fill me-1"></i> FPT Aptech Identity Portal
+                        </span>
+                        <h2 class="fw-bold mb-2">Xin chào, <span th:text="${currentUser.username}" class="text-primary">Học viên</span>!</h2>
+                        <p class="text-muted mb-0">Hệ thống bảo mật và quản lý tài khoản trung tâm của bạn</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <span class="badge px-3 py-2 fs-6 rounded-pill"
+                              th:classappend="'badge-status-' + ${currentUser.status}"
+                              th:text="${currentUser.status}">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="row g-4">
+        <!-- Account Info Card -->
+        <div class="col-lg-6">
+            <div class="portal-card p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="p-2 bg-primary-subtle text-primary rounded-3 me-3">
+                        <i class="bi bi-person-badge fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Thông tin tài khoản</h5>
+                </div>
+                <div class="list-group list-group-flush small">
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Tên đăng nhập:</span>
+                        <span class="fw-semibold text-dark" th:text="${currentUser.username}">admin</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Địa chỉ Email:</span>
+                        <span class="fw-semibold text-dark" th:text="${currentUser.email}">email@fpt.edu.vn</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Vai trò (Roles):</span>
+                        <div>
+                            <span th:each="r : ${currentUser.roles}"
+                                  class="badge bg-secondary-subtle text-secondary me-1 rounded-pill"
+                                  th:text="${r.name}">ROLE_STUDENT</span>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2">
+                        <span class="text-muted">Thời điểm khởi tạo:</span>
+                        <span class="fw-semibold text-dark" th:text="${#temporals.format(currentUser.createdAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security & 2FA Status -->
+        <div class="col-lg-6">
+            <div class="portal-card p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="p-2 bg-info-subtle text-info rounded-3 me-3">
+                        <i class="bi bi-shield-check fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Bảo mật đa yếu tố (2FA TOTP)</h5>
+                </div>
+
+                <div th:if="${totpEnabled}" class="p-3 bg-success-subtle rounded-3 mb-3 border border-success-subtle">
+                    <div class="d-flex align-items-center text-success fw-bold mb-1">
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i> Đã kích hoạt 2FA TOTP (RFC 6238)
+                    </div>
+                    <p class="small text-success-emphasis mb-0">Tài khoản được bảo vệ bằng mã OTP 30s mã hóa AES-GCM trong CSDL.</p>
+                </div>
+
+                <div th:unless="${totpEnabled}" class="p-3 bg-warning-subtle rounded-3 mb-3 border border-warning-subtle">
+                    <div class="d-flex align-items-center text-warning-emphasis fw-bold mb-1">
+                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> Chưa kích hoạt 2FA TOTP
+                    </div>
+                    <p class="small text-warning-emphasis mb-2">Giảng viên và Quản trị viên bắt buộc phải kích hoạt 2FA trước khi tiếp tục các thao tác khác.</p>
+                    <a th:href="@{/totp/setup}" class="btn btn-warning btn-sm fw-semibold rounded-pill">
+                        <i class="bi bi-qr-code me-1"></i> Thiết lập 2FA ngay
+                    </a>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a th:href="@{/me/change-password}" class="btn btn-outline-primary btn-sm rounded-pill py-2">
+                        <i class="bi bi-key me-1"></i> Đổi mật khẩu tài khoản
+                    </a>
+                    <a th:href="@{/me/sessions}" class="btn btn-outline-secondary btn-sm rounded-pill py-2">
+                        <i class="bi bi-laptop me-1"></i> Quản lý các thiết bị đăng nhập (Sessions)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Shortcut Card if Role Admin -->
+        <div class="col-12" sec:authorize="hasRole('ADMIN')">
+            <div class="portal-card p-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-danger p-2 rounded-3 me-2"><i class="bi bi-shield-lock-fill"></i></span>
+                        <h5 class="fw-bold mb-0 text-dark">Khu vực Quản trị viên (ADMIN PORTAL)</h5>
+                    </div>
+                    <span class="badge bg-danger-subtle text-danger">Đặc quyền quản trị</span>
+                </div>
+                <p class="text-muted small">Bạn có quyền quản lý toàn bộ học viên, giảng viên, khóa/mở khóa tài khoản và kiểm tra nhật ký an ninh.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/admin/users}" class="btn btn-primary btn-sm rounded-pill px-3">
+                        <i class="bi bi-people-fill me-1"></i> Danh sách người dùng
+                    </a>
+                    <a th:href="@{/admin/audit-logs}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                        <i class="bi bi-journal-check me-1"></i> Xem Nhật ký kiểm toán (Audit Logs)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header('Quản lý Phiên đăng nhập')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div th:replace="~{fragments :: alerts}"></div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="portal-card p-4 p-sm-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1"><i class="bi bi-laptop text-primary me-2"></i>Thiết bị & Phiên làm việc (F8)</h4>
+                        <p class="text-muted small mb-0">Hệ thống cho phép tối đa 02 phiên đăng nhập đồng thời. Bạn có thể đăng xuất từ xa từng phiên.</p>
+                    </div>
+                    <a th:href="@{/}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left"></i> Quay lại Trang chủ
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Thiết bị / Trình duyệt</th>
+                                <th>Địa chỉ IP</th>
+                                <th>Khởi tạo lúc</th>
+                                <th>Hoạt động gần nhất</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+                            <tr th:each="s : ${sessions}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-display fs-4 text-primary me-2"></i>
+                                        <span class="text-break" th:text="${s.userAgent}">Chrome on Windows</span>
+                                    </div>
+                                </td>
+                                <td><code class="text-primary" th:text="${s.ipAddress}">127.0.0.1</code></td>
+                                <td th:text="${#temporals.format(s.creationTime, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</td>
+                                <td th:text="${#temporals.format(s.lastAccessTime, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</td>
+                                <td>
+                                    <span th:if="${s.current}" class="badge bg-success rounded-pill px-3 py-1">
+                                        <i class="bi bi-check-circle me-1"></i> Phiên hiện tại
+                                    </span>
+                                    <span th:unless="${s.current}" class="badge bg-secondary rounded-pill px-3 py-1">
+                                        Phiên từ xa
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <form th:unless="${s.current}" th:action="@{'/me/sessions/' + ${s.sessionId} + '/terminate'}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                                onclick="return confirm('Bạn có chắc chắn muốn đăng xuất thiết bị này?')">
+                                            <i class="bi bi-door-closed me-1"></i> Đăng xuất từ xa
+                                        </button>
+                                    </form>
+                                    <span th:if="${s.current}" class="text-muted small italic">Đang dùng</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(sessions)}">
+                                <td colspan="6" class="text-center text-muted py-4">Không tìm thấy thông tin phiên làm việc.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

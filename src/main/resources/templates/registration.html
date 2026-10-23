@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header('Đăng ký học viên')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div th:replace="~{fragments :: alerts}"></div>
+
+<div class="container my-auto py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6 col-xl-5">
+            <div class="portal-card p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-3">
+                        <i class="bi bi-person-plus-fill fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">Đăng ký Học viên</h3>
+                    <p class="text-muted small">Tạo tài khoản để tham gia hệ sinh thái FPT Aptech</p>
+                </div>
+
+                <div th:if="${#fields.hasErrors('${registrationForm.*}')}" class="alert alert-danger py-2 px-3 small rounded-3">
+                    <ul class="mb-0 ps-3">
+                        <li th:each="err : ${#fields.errors('${registrationForm.*}')}" th:text="${err}">Lỗi</li>
+                    </ul>
+                </div>
+
+                <form th:action="@{/registration}" th:object="${registrationForm}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Tên đăng nhập</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" th:field="*{username}" class="form-control bg-light border-start-0" placeholder="ví dụ: nguyenvana" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Địa chỉ Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" th:field="*{email}" class="form-control bg-light border-start-0" placeholder="hocvien@fptaptech.edu.vn" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Mật khẩu (Tối thiểu 12 ký tự)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-shield-lock"></i></span>
+                            <input type="password" th:field="*{password}" class="form-control bg-light border-start-0" placeholder="Tối thiểu 12 ký tự" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary">Xác nhận lại mật khẩu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-shield-check"></i></span>
+                            <input type="password" th:field="*{confirmPassword}" class="form-control bg-light border-start-0" placeholder="Nhập lại chính xác mật khẩu" required>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 small text-muted">
+                        <div class="fw-semibold text-dark mb-1"><i class="bi bi-info-circle text-primary"></i> Chính sách mật khẩu FPT Aptech:</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Độ dài tối thiểu 12 ký tự</li>
+                            <li>Không chứa tên đăng nhập hoặc phần tên của email</li>
+                            <li>Không nằm trong danh sách mật khẩu dễ đoán phổ biến</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn btn-gradient w-100 py-2 rounded-3 mb-3">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Tạo tài khoản
+                    </button>
+                </form>
+
+                <div class="text-center pt-3 border-top">
+                    <span class="text-muted small">Đã có tài khoản? </span>
+                    <a th:href="@{/login}" class="small fw-semibold text-decoration-none text-primary">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

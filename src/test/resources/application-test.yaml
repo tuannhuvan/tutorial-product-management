@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+  session:
+    store-type: none
+  docker:
+    compose:
+      enabled: false
+
+app:
+  base-url: http://localhost:8080
+  security:
+    totp:
+      aes-key: 4f7c8b2a1e3d5f90a2b4c6e8f1a3b5c7
+      issuer: "FPT Aptech Test"
+    password:
+      min-length: 12
+    lock:
+      max-failed-attempts: 5
+      duration-minutes: 15

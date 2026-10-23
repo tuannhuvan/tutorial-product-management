@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header('Đăng nhập')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div th:replace="~{fragments :: alerts}"></div>
+
+<div class="container my-auto py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5 col-xl-4">
+            <div class="portal-card p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-3">
+                        <i class="bi bi-person-fill-lock fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">Đăng nhập</h3>
+                    <p class="text-muted small">Cổng thông tin tài khoản FPT Aptech</p>
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Tên đăng nhập hoặc Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" class="form-control bg-light border-start-0" placeholder="Username hoặc email" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label small fw-semibold text-secondary">Mật khẩu</label>
+                            <a th:href="@{/forgot-password}" class="small text-decoration-none text-primary">Quên mật khẩu?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key"></i></span>
+                            <input type="password" name="password" class="form-control bg-light border-start-0" placeholder="••••••••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" name="remember-me" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label small text-muted" for="rememberMe">Ghi nhớ đăng nhập (14 ngày)</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-gradient w-100 py-2 rounded-3 mb-3">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                    </button>
+                </form>
+
+                <div class="text-center pt-3 border-top">
+                    <span class="text-muted small">Chưa có tài khoản? </span>
+                    <a th:href="@{/registration}" class="small fw-semibold text-decoration-none text-primary">Đăng ký học viên ngay</a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button class="btn btn-link btn-sm text-decoration-none text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#resendVerifyCollapse">
+                        <i class="bi bi-envelope-arrow-up"></i> Chưa nhận được email kích hoạt?
+                    </button>
+                    <div class="collapse mt-2" id="resendVerifyCollapse">
+                        <form th:action="@{/resend-verification}" method="post" class="p-3 bg-light rounded-3 text-start">
+                            <label class="form-label small text-muted">Nhập email của bạn để gửi lại:</label>
+                            <div class="input-group">
+                                <input type="email" name="email" class="form-control form-control-sm" placeholder="email@example.com" required>
+                                <button class="btn btn-secondary btn-sm" type="submit">Gửi lại</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

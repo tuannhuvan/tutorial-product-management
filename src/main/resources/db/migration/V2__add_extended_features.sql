@@ -1,0 +1,71 @@
+-- Bảng xác minh email & khôi phục mật khẩu
+CREATE TABLE IF NOT EXISTS email_tokens (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT NOT NULL,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    token_type VARCHAR(20) NOT NULL, -- VERIFY_EMAIL, RESET_PASSWORD
+    expires_at DATETIME(6) NOT NULL,
+    used       BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_email_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+-- Bảng lưu TOTP Secret mã hóa AES-GCM
+CREATE TABLE IF NOT EXISTS totp_secrets (
+    user_id          BIGINT PRIMARY KEY,
+    encrypted_secret VARCHAR(255) NOT NULL,
+    enabled          BOOLEAN NOT NULL DEFAULT FALSE,
+    recovery_codes   TEXT NOT NULL,
+    CONSTRAINT fk_totp_secrets_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+-- Bảng Nhật ký kiểm toán Audit Log
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT,
+    username    VARCHAR(50),
+    event_type  VARCHAR(50) NOT NULL,
+    ip_address  VARCHAR(45) NOT NULL,
+    user_agent  VARCHAR(255),
+    details     TEXT,
+    created_at  DATETIME(6) NOT NULL
+);
+
+-- Bảng lưu lịch sử mật khẩu gần nhất (chống trùng lặp 5 lần)
+CREATE TABLE IF NOT EXISTS password_history (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id       BIGINT NOT NULL,
+    password_hash VARCHAR(100) NOT NULL,
+    created_at    DATETIME(6) NOT NULL,
+    CONSTRAINT fk_password_history_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+-- Bảng Spring Security Remember-me Persistent Tokens
+CREATE TABLE IF NOT EXISTS persistent_logins (
+    username  VARCHAR(64) NOT NULL,
+    series    VARCHAR(64) PRIMARY KEY,
+    token     VARCHAR(64) NOT NULL,
+    last_used TIMESTAMP NOT NULL
+);
+
+-- Bảng Spring Session JDBC cho quản lý đa phiên
+CREATE TABLE IF NOT EXISTS SPRING_SESSION (
+    PRIMARY_ID CHAR(36) NOT NULL,
+    SESSION_ID CHAR(36) NOT NULL,
+    CREATION_TIME BIGINT NOT NULL,
+    LAST_ACCESS_TIME BIGINT NOT NULL,
+    MAX_INACTIVE_INTERVAL INT NOT NULL,
+    EXPIRY_TIME BIGINT NOT NULL,
+    PRINCIPAL_NAME VARCHAR(100),
+    CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID),
+    UNIQUE KEY SPRING_SESSION_IX1 (SESSION_ID),
+    KEY SPRING_SESSION_IX2 (EXPIRY_TIME),
+    KEY SPRING_SESSION_IX3 (PRINCIPAL_NAME)
+);
+
+CREATE TABLE IF NOT EXISTS SPRING_SESSION_ATTRIBUTES (
+    SESSION_PRIMARY_ID CHAR(36) NOT NULL,
+    ATTRIBUTE_NAME VARCHAR(200) NOT NULL,
+    ATTRIBUTE_BYTES BLOB NOT NULL,
+    CONSTRAINT SPRING_SESSION_ATTRIBUTES_PK PRIMARY KEY (SESSION_PRIMARY_ID, ATTRIBUTE_NAME),
+    CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
+);

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header('Cài đặt Xác thực 2 bước (2FA)')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div th:replace="~{fragments :: alerts}"></div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="portal-card p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-3">
+                        <i class="bi bi-shield-shaded fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">Thiết lập Xác thực 2 yếu tố (2FA TOTP)</h3>
+                    <p class="text-muted small">Bảo mật tài khoản của bạn theo tiêu chuẩn công nghiệp RFC 6238</p>
+                </div>
+
+                <div th:if="${mandatory}" class="alert alert-warning rounded-3 border-0 small mb-4">
+                    <i class="bi bi-shield-exclamation me-1 fs-5"></i>
+                    <strong>Yêu cầu bắt buộc:</strong> Tài khoản của bạn có vai trò Giảng viên (LECTURER) hoặc Quản trị viên (ADMIN). Bạn bắt buộc phải hoàn tất cài đặt 2FA trước khi có thể sử dụng hệ thống.
+                </div>
+
+                <div class="row g-4 align-items-center mb-4">
+                    <div class="col-md-5 text-center">
+                        <div class="p-2 bg-white rounded-3 border d-inline-block shadow-sm">
+                            <img th:src="${qrCodeUri}" alt="TOTP QR Code" class="img-fluid" style="width: 200px; height: 200px;">
+                        </div>
+                        <div class="small text-muted mt-2">Quét bằng Google Authenticator hoặc Microsoft Authenticator</div>
+                    </div>
+                    <div class="col-md-7">
+                        <h6 class="fw-bold text-dark mb-2">Bước 1: Quét mã QR hoặc Nhập khóa thủ công</h6>
+                        <p class="small text-muted mb-2">Nếu không thể quét mã QR, hãy nhập mã khóa bí mật này vào ứng dụng của bạn:</p>
+                        <div class="p-2 bg-light rounded-3 font-monospace small text-primary fw-bold text-break mb-3" th:text="${secretKey}">
+                            JBSWY3DPEHPK3PXP
+                        </div>
+
+                        <h6 class="fw-bold text-dark mb-2">Bước 2: Lưu 10 Mã khôi phục khẩn cấp</h6>
+                        <p class="small text-muted mb-2">Lưu lại các mã này ở nơi an toàn. Mỗi mã chỉ dùng được 1 lần nếu bạn làm mất thiết bị:</p>
+                        <div class="row g-2 p-2 bg-light rounded-3 font-monospace small mb-3">
+                            <div th:each="code : ${recoveryCodes}" class="col-6">
+                                <span class="badge bg-secondary-subtle text-secondary w-100 py-1" th:text="${code}">A1B2C3D4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-top pt-4">
+                    <h6 class="fw-bold text-dark mb-2">Bước 3: Nhập mã xác nhận để kích hoạt</h6>
+                    <p class="small text-muted mb-3">Nhập mã 6 chữ số đang hiển thị trên ứng dụng Authenticator của bạn:</p>
+
+                    <form th:action="@{/totp/enable}" method="post">
+                        <div class="row g-2">
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-123"></i></span>
+                                    <input type="text" name="code" class="form-control bg-light border-start-0 text-center fw-bold fs-5 font-monospace" placeholder="123456" maxlength="6" pattern="\d{6}" required autofocus>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="submit" class="btn btn-gradient w-100 py-2 rounded-3">
+                                    <i class="bi bi-check2-circle me-1"></i> Kích hoạt
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

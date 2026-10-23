@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header('Quản trị Người dùng')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+<div th:replace="~{fragments :: alerts}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="portal-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h4 class="fw-bold text-dark mb-1"><i class="bi bi-people-fill text-primary me-2"></i>Quản trị Tài khoản (F10)</h4>
+                <p class="text-muted small mb-0">Tìm kiếm, phân quyền, khóa và vô hiệu hóa tài khoản học viên, giảng viên</p>
+            </div>
+            <a th:href="@{/}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                <i class="bi bi-house me-1"></i> Trang chủ
+            </a>
+        </div>
+
+        <!-- Filter Form -->
+        <form th:action="@{/admin/users}" method="get" class="row g-2 mb-4 p-3 bg-light rounded-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="query" th:value="${query}" class="form-control" placeholder="Tìm theo username hoặc email...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}" th:selected="${st == status}">ACTIVE</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="roleName" class="form-select">
+                    <option value="">-- Tất cả vai trò --</option>
+                    <option value="ROLE_STUDENT" th:selected="${roleName == 'ROLE_STUDENT'}">ROLE_STUDENT</option>
+                    <option value="ROLE_LECTURER" th:selected="${roleName == 'ROLE_LECTURER'}">ROLE_LECTURER</option>
+                    <option value="ROLE_ADMIN" th:selected="${roleName == 'ROLE_ADMIN'}">ROLE_ADMIN</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary rounded-3">
+                    <i class="bi bi-funnel me-1"></i> Lọc
+                </button>
+            </div>
+        </form>
+
+        <!-- User Table -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light small">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên người dùng</th>
+                        <th>Email</th>
+                        <th>Trạng thái</th>
+                        <th>Vai trò</th>
+                        <th>Khởi tạo lúc</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                    <tr th:each="u : ${usersPage.content}">
+                        <td class="fw-bold" th:text="${u.id}">1</td>
+                        <td>
+                            <span class="fw-bold text-dark" th:text="${u.username}">admin</span>
+                        </td>
+                        <td th:text="${u.email}">email@fpt.edu.vn</td>
+                        <td>
+                            <span class="badge rounded-pill px-3 py-1"
+                                  th:classappend="'badge-status-' + ${u.status}"
+                                  th:text="${u.status}">ACTIVE</span>
+                        </td>
+                        <td>
+                            <span th:each="r : ${u.roles}" class="badge bg-secondary-subtle text-secondary rounded-pill me-1" th:text="${r.name}">ROLE</span>
+                        </td>
+                        <td th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <!-- Lock/Unlock Button -->
+                                <form th:if="${u.status.name() != 'LOCKED' && u.status.name() != 'DISABLED'}"
+                                      th:action="@{'/admin/users/' + ${u.id} + '/lock'}" method="post" class="d-inline">
+                                    <input type="hidden" name="locked" value="true">
+                                    <button type="submit" class="btn btn-outline-warning" title="Khóa tạm thời"
+                                            onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản này?')">
+                                        <i class="bi bi-lock-fill"></i> Khóa
+                                    </button>
+                                </form>
+                                <form th:if="${u.status.name() == 'LOCKED'}"
+                                      th:action="@{'/admin/users/' + ${u.id} + '/lock'}" method="post" class="d-inline">
+                                    <input type="hidden" name="locked" value="false">
+                                    <button type="submit" class="btn btn-outline-success" title="Mở khóa tài khoản">
+                                        <i class="bi bi-unlock-fill"></i> Mở khóa
+                                    </button>
+                                </form>
+
+                                <!-- Disable Button -->
+                                <form th:if="${u.status.name() != 'DISABLED'}"
+                                      th:action="@{'/admin/users/' + ${u.id} + '/disable'}" method="post" class="d-inline ms-1">
+                                    <button type="submit" class="btn btn-outline-danger" title="Vô hiệu hóa vĩnh viễn"
+                                            onclick="return confirm('Bạn có chắc chắn muốn VÔ HIỆU HÓA tài khoản này? Mọi phiên đăng nhập sẽ bị chấm dứt lập tức.')">
+                                        <i class="bi bi-slash-circle"></i> Vô hiệu hóa
+                                    </button>
+                                </form>
+
+                                <!-- Delete Button -->
+                                <form th:action="@{'/admin/users/' + ${u.id} + '/delete'}" method="post" class="d-inline ms-1">
+                                    <button type="submit" class="btn btn-outline-dark" title="Xóa tài khoản"
+                                            onclick="return confirm('Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản này?')">
+                                        <i class="bi bi-trash-fill"></i> Xóa
+                                    </button>
+                                </form>
+
+                                <!-- Change Roles Dropdown/Modal -->
+                                <button type="button" class="btn btn-outline-primary ms-1" data-bs-toggle="modal" th:data-bs-target="'#rolesModal' + ${u.id}">
+                                    <i class="bi bi-shield-check"></i> Vai trò
+                                </button>
+                            </div>
+
+                            <!-- Role Modal -->
+                            <div class="modal fade" th:id="'rolesModal' + ${u.id}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered text-start">
+                                    <div class="modal-content">
+                                        <form th:action="@{'/admin/users/' + ${u.id} + '/roles'}" method="post">
+                                            <div class="modal-header">
+                                                <h6 class="modal-title fw-bold">Gán vai trò cho: <span th:text="${u.username}">user</span></h6>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" name="roles" value="ROLE_STUDENT"
+                                                           th:id="'roleStudent' + ${u.id}" th:checked="${u.hasRole('ROLE_STUDENT')}">
+                                                    <label class="form-check-label" th:for="'roleStudent' + ${u.id}">ROLE_STUDENT (Học viên)</label>
+                                                </div>
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" name="roles" value="ROLE_LECTURER"
+                                                           th:id="'roleLecturer' + ${u.id}" th:checked="${u.hasRole('ROLE_LECTURER')}">
+                                                    <label class="form-check-label" th:for="'roleLecturer' + ${u.id}">ROLE_LECTURER (Giảng viên)</label>
+                                                </div>
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" name="roles" value="ROLE_ADMIN"
+                                                           th:id="'roleAdmin' + ${u.id}" th:checked="${u.hasRole('ROLE_ADMIN')}">
+                                                    <label class="form-check-label" th:for="'roleAdmin' + ${u.id}">ROLE_ADMIN (Quản trị viên)</label>
+                                                </div>
+                                                <small class="text-muted">Lưu ý: Hệ thống bắt buộc phải duy trì ít nhất 01 Quản trị viên ACTIVE.</small>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-primary btn-sm">Lưu thay đổi</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(usersPage.content)}">
+                        <td colspan="7" class="text-center text-muted py-4">Không tìm thấy người dùng phù hợp.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${usersPage.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top small">
+            <span class="text-muted">Trang <span th:text="${usersPage.number + 1}">1</span> / <span th:text="${usersPage.totalPages}">1</span> (Tổng <span th:text="${usersPage.totalElements}">0</span> tài khoản)</span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${usersPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/users(page=${usersPage.number - 1}, query=${query}, status=${status}, roleName=${roleName})}">Trước</a>
+                </li>
+                <li class="page-item" th:classappend="${usersPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/users(page=${usersPage.number + 1}, query=${query}, status=${status}, roleName=${roleName})}">Tiếp</a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
